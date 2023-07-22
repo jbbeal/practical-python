@@ -19,25 +19,28 @@ def read_portfolio_dict(filename):
     with open(filename, 'rt') as f:
         r = csv.reader(f)
         headers = next(r)
-        for row in r:
-            holding = {
-                'name': row[0],
-                'shares': int(row[1]),
-                'price': float(row[2])
-            }
-            portfolio.append(holding)
+        for i, row in enumerate(r, start=2):
+            try:
+                holding = {
+                    'name': row[0],
+                    'shares': int(row[1]),
+                    'price': float(row[2])
+                }
+                portfolio.append(holding)
+            except ValueError:
+                print(f"Error parsing line {i}")
     return portfolio
 
 def read_prices(filename):
     lookup = {}
     with open(filename, 'rt') as f:
         r = csv.reader(f)
-        for row in r:
+        for i, row in enumerate(r):
             try:
                 if len(row) == 2:
                     lookup[row[0]] = float(row[1])
             except ValueError:
-                print(f"Error parsing {row}")
+                print(f"Error parsing row {i}")
     return lookup
 
 def p_and_l(portfolio, prices):
