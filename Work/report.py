@@ -20,12 +20,9 @@ def read_portfolio_dict(filename):
         r = csv.reader(f)
         headers = next(r)
         for i, row in enumerate(r, start=2):
+            row_dict = dict(zip(headers, row))
             try:
-                holding = {
-                    'name': row[0],
-                    'shares': int(row[1]),
-                    'price': float(row[2])
-                }
+                holding = dict(zip(['name','shares','price'],(row_dict['name'], int(row_dict['shares']), float(row_dict['price']))))
                 portfolio.append(holding)
             except ValueError:
                 print(f"Error parsing line {i}")
