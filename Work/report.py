@@ -74,8 +74,10 @@ def print_report(rep):
         print(f"{'Name':<8s} {'Shares':>10s} {'Price':>10s} {'Change':>10s}")
         print(sep*8,sep*10,sep*10,sep*10)
     def format(line):
-        print(f"{line[0]:<8s} {line[1]:>10d} {line[2]:>10.2f} {line[3]:>10.2f}")
+        print(f"{line[0]:<8s} {line[1]:>10d} {line[2]:>10s} {line[3]:>10.2f}")
+    def currency(num):
+        return f"${num:0,.2f}"
     
     print_headers()
     for line in rep:
-        format((line['name'], line['shares'], line['current_price'], line['current_price'] - line ['original_price']))
+        format((line['name'], line['shares'], currency(line['current_price']), line['current_price'] - line ['original_price']))
