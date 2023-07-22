@@ -57,8 +57,25 @@ def p_and_l(portfolio, prices):
         cur_portfolio.append({
             'name': name,
             'shares': shares,
+            'original_price': price,
+            'current_price': cur_price,
             'original_value': orig_value,
             'current_value': cur_value,
             'gain': cur_value - orig_value # negatives are losses
             })
     return cur_portfolio
+
+def print_report(rep):
+    """
+    Given a profit-and-loss report (as returned by `p_and_l`, print the report in nicely formatted columns.
+    """
+    def print_headers():
+        sep = '-'
+        print(f"{'Name':<8s} {'Shares':>10s} {'Price':>10s} {'Change':>10s}")
+        print(sep*8,sep*10,sep*10,sep*10)
+    def format(line):
+        print(f"{line[0]:<8s} {line[1]:>10d} {line[2]:>10.2f} {line[3]:>10.2f}")
+    
+    print_headers()
+    for line in rep:
+        format((line['name'], line['shares'], line['current_price'], line['current_price'] - line ['original_price']))
