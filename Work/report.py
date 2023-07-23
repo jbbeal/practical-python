@@ -95,3 +95,6 @@ def file_to_dict(filename, converters=None):
             { header: f(row[i]) for header, (i, f) in full_converters.items() }
             for row in r
         ]
+
+dow_converters = { h: float for h in ['price', 'open', 'low', 'high', 'change'] } | { h: int for h in ['volume', 'shares'] }
+    
