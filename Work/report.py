@@ -81,3 +81,17 @@ def print_report(rep):
     print_headers()
     for line in rep:
         format((line['name'], line['shares'], currency(line['current_price']), line['current_price'] - line ['original_price']))
+
+def file_to_dict(filename, converters=None):
+    """Reads a CSV file and returns a list of dictionary items representing each row. The first row of the CSV file will be read as a list of
+    column headers which will be used as the keys in all dictionary items.  By default, all fields will be returned as strings. You can
+    provide a `converters` argument as a dictionary from header name to conversion function.  """
+    converters = {} if converters is None else converters
+    with open(filename, 'rt') as f:
+        r = csv.reader(f)
+        headers = next(r)
+        full_converters = { h: (headers.index(h), converters.get(h, str)) for h in headers }
+        return [
+            { header: f(row[i]) for header, (i, f) in full_converters.items() }
+            for row in r
+        ]
