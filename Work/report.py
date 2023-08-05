@@ -2,68 +2,36 @@
 #
 # Exercise 2.4
 
+from fileparse import parse_csv
+
 import csv
 
-def read_portfolio(filename):
-    portfolio = []
-    with open(filename, 'rt') as f:
-        r = csv.reader(f)
-        headers = next(r)
-        for row in r:
-            holding = (row[0], int(row[1]), float(row[2]))
-            portfolio.append(holding)
-    return portfolio
+dow_converters = { h: float for h in ['price', 'open', 'low', 'high', 'change'] } | { h: int for h in ['volume', 'shares'] }
+"Converter functions for numeric columns in reports."
 
-def read_portfolio_dict(filename):
-    portfolio = []
-    with open(filename, 'rt') as f:
-        r = csv.reader(f)
-        headers = next(r)
-        for i, row in enumerate(r, start=2):
-            row_dict = dict(zip(headers, row))
-            try:
-                holding = dict(zip(['name','shares','price'],(row_dict['name'], int(row_dict['shares']), float(row_dict['price']))))
-                portfolio.append(holding)
-            except ValueError:
-                print(f"Error parsing line {i}")
-    return portfolio
+def read_portfolio(portfolio_lines):
+    return parse_csv(portfolio_lines, select=['name', 'shares', 'price'], converters=dow_converters)
 
-def read_prices(filename):
-    lookup = {}
-    with open(filename, 'rt') as f:
-        r = csv.reader(f)
-        for i, row in enumerate(r):
-            try:
-                if len(row) == 2:
-                    lookup[row[0]] = float(row[1])
-            except ValueError:
-                print(f"Error parsing row {i}")
-    return lookup
+def read_prices(prices_lines):
+    return parse_csv(prices_lines, converters=dow_converters, headers=['name', 'price'])
 
 def p_and_l(portfolio, prices):
+    """Given a stock portfolio, represented as a list of dicts as returned by `read_portfolio` and a dict of current prices (as returned by
+    `read_prices`), compute the total value of the portfolio and print overall gain and loss.
+
     """
-    Given a stock portfolio, represented as a list of dicts as returned by `read_portfolio_dict`
-    and a dict of current prices (as returned by `read_prices`), compute the total value of the
-    portfolio and print overall gain and loss.
-    """
-    cur_portfolio = []
-    for record in portfolio:
-        name = record['name']
-        price = record['price']
-        shares = record['shares']
-        cur_price = prices[name]
-        orig_value = shares * price
-        cur_value = shares * cur_price
-        cur_portfolio.append({
-            'name': name,
-            'shares': shares,
-            'original_price': price,
-            'current_price': cur_price,
-            'original_value': orig_value,
-            'current_value': cur_value,
-            'gain': cur_value - orig_value # negatives are losses
-            })
-    return cur_portfolio
+    def summarize_holding(holding):
+        price = holding['price']
+        shares = holding['shares']
+        cur_price = prices[holding['name']]
+        holding['current_price'] = cur_price
+        holding['original_price'] = price
+        holding['original_value'] = shares * price
+        holding['current_value'] = shares * cur_price
+        holding['gain'] = holding['current_value'] - holding['original_value']
+        return holding
+    return [ summarize_holding(h)
+             for h in portfolio ]
 
 def print_report(rep):
     """
@@ -82,22 +50,21 @@ def print_report(rep):
     for line in rep:
         format((line['name'], line['shares'], currency(line['current_price']), line['current_price'] - line ['original_price']))
 
-def file_to_dict(filename: str, select=None, converters={}, headers=None) -> dict:
-    """Reads a CSV file and returns a list of dictionary items representing each row. The first row of the CSV file will be read as a list of
-    column headers which will be used as the keys in all dictionary items.  By default, all fields will be returned as strings. You can
-    provide a `converters` argument as a dictionary from header name to conversion function.  """
-    with open(filename, 'rt') as f:
-        r = csv.reader(f)
-        headers = next(r) if headers is None else headers
-        select = headers if select is None else select
-        return [
-            {
-                header: converters.get(header, str)(value)
-                for header, value in zip(headers, row)
-                if header in select
-            }
-            for row in r
-        ]
+def portfolio_report(portfolio_file='Data/portfolio.csv', prices_file='Data/prices.csv'):
+    with open(portfolio_file, 'rt') as port_file:
+        with open(portfolio_file, 'rt') as pr_file:         
+            portfolio = read_portfolio(port_file)
+            prices = read_prices(pr_file)
+            prices_dict = { p['name']: p['price'] for p in prices}
+            print_report(p_and_l(portfolio, prices_dict))
 
-dow_converters = { h: float for h in ['price', 'open', 'low', 'high', 'change'] } | { h: int for h in ['volume', 'shares'] }
-    
+def _main(argv):
+    if len(argv) != 3:
+        raise SystemExit(f'Usage: {sys.argv[0]} portfile pricefile')
+    portfolio_report(argv[1], argv[2])
+
+
+if __name__ == '__main__':
+    import sys
+
+    _main(sys.argv)
