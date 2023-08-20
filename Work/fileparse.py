@@ -27,6 +27,6 @@ def parse_csv(lines, select=None, converters={}, headers=None, silence_errors=Fa
             )
         except ValueError as e:
             if not silence_errors:
-                print(f"Couldn't convert {row} because {e}")
+                print(f"Could not convert {row} because {e}")
     return rows_as_dict
 
