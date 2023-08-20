@@ -4,6 +4,7 @@
 
 from fileparse import parse_csv
 from stock import Stock
+from portfolio import Portfolio
 from tableformat import create_formatter
 
 import csv
@@ -12,10 +13,10 @@ dow_converters = { h: float for h in ['price', 'open', 'low', 'high', 'change'] 
 "Converter functions for numeric columns in reports."
 
 def read_portfolio(portfolio_lines):
-    return [
+    return Portfolio([
         Stock(p['name'], p['shares'], p['price'])
         for p in parse_csv(portfolio_lines, select=['name', 'shares', 'price'], converters=dow_converters)
-    ]
+    ])
 
 def read_prices(prices_lines):
     return parse_csv(prices_lines, converters=dow_converters, headers=['name', 'price'])
