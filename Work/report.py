@@ -34,7 +34,7 @@ def p_and_l(portfolio, prices):
         cur_price = prices[stock.name]
         holding['current_price'] = cur_price
         holding['original_price'] = stock.price
-        holding['original_value'] = stock.cost()
+        holding['original_value'] = stock.cost
         holding['current_value'] = stock.shares * cur_price
         holding['gain'] = holding['current_value'] - holding['original_value']
         return holding
